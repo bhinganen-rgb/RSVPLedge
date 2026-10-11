@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSVPledge — Say you'll come. Mean it.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.9.0/ethers.umd.min.js"></script>
+<style>
+/* ---------- Premium Dark Emerald + Amber ---------- */
+:root {
+  --bg: #0a1a15;
+  --bg-2: #0f2620;
+  --panel: rgba(255, 255, 255, 0.03);
+  --panel-2: rgba(255, 255, 255, 0.05);
+  --panel-border: rgba(245, 182, 66, 0.10);
+  --panel-border-strong: rgba(245, 182, 66, 0.22);
+  --amber: #f5b642;
+  --amber-dim: #b98524;
+  --amber-glow: rgba(245, 182, 66, 0.14);
+  --text: #e8e2d5;
+  --muted: #7a8b82;
+  --sage: #94a89e;
+  --rose: #d97a7a;
+  --ink: #0a1a15;
+  --success: #6dbf8a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(245,182,66,0.06), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(109,191,138,0.04), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.025 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.serif { font-family: "Fraunces", Georgia, serif; }
+.italic { font-style: italic; }
+
+.container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+/* ---------- Topbar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 60;
+  background: rgba(10, 26, 21, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(245,182,66,0.10);
+}
+.topbar-inner { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
+.wordmark {
+  font-family: "Fraunces", serif; font-style: italic; font-weight: 600;
+  font-size: 26px; letter-spacing: -0.01em; color: var(--text);
+}
+.wordmark .amp { color: var(--amber); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 22px;
+  font-family: "Inter", sans-serif; font-weight: 600; font-size: 14px;
+  border-radius: 999px; border: 1px solid transparent;
+  cursor: pointer; transition: transform .08s ease, background .15s ease, border-color .15s ease, color .15s ease;
+  text-decoration: none;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--amber); color: var(--ink); border-color: var(--amber); }
+.btn-primary:hover { background: #ffcb63; border-color: #ffcb63; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid rgba(148,168,158,0.28); }
+.btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
+.btn-sm { padding: 7px 14px; font-size: 12.5px; }
+.btn-block { width: 100%; }
+
+/* ---------- Hero ---------- */
+.hero { padding: 96px 0 60px; text-align: center; position: relative; }
+.hero h1 {
+  font-family: "Fraunces", serif;
+  font-style: italic; font-weight: 600;
+  font-size: clamp(46px, 7vw, 84px);
+  line-height: 1.02; letter-spacing: -0.02em;
+  margin: 0 0 20px;
+}
+.hero h1 .accent {
+  position: relative; color: var(--amber);
+}
+.hero h1 .accent::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -6px; height: 8px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12'><path d='M2 8 Q 75 -1 150 6 T 298 5' stroke='%23f5b642' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>") center/100% 100% no-repeat;
+}
+.hero .sub {
+  max-width: 620px; margin: 0 auto 34px;
+  font-size: 18px; color: var(--sage); line-height: 1.55;
+}
+.hero .cta-row { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* Hero preview card */
+.hero-preview {
+  max-width: 640px; margin: 70px auto 0;
+  position: relative;
+}
+.hero-preview::before {
+  content: ""; position: absolute; inset: -40px -20px;
+  background: radial-gradient(ellipse at center, rgba(245,182,66,0.12), transparent 65%);
+  pointer-events: none; z-index: 0;
+}
+.hero-preview .event-card { position: relative; z-index: 1; }
+
+/* ---------- Section divider ---------- */
+.divider {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 40px 0;
+}
+.divider .line { flex: 0 1 200px; height: 1px; background: linear-gradient(90deg, transparent, var(--amber-dim), transparent); }
+.divider .diamond {
+  width: 8px; height: 8px; background: var(--amber);
+  transform: rotate(45deg);
+}
+
+/* ---------- How it works ---------- */
+.how { padding: 40px 0 80px; }
+.how h2 {
+  font-family: "Fraunces", serif; font-style: italic; font-weight: 600;
+  font-size: 40px; text-align: center; margin: 0 0 12px; letter-spacing: -0.01em;
+}
+.how .lede { text-align: center; color: var(--sage); margin: 0 auto 44px; max-width: 500px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; }
+.step {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 28px 26px;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(245,182,66,0.06);
+  transition: border-color .2s ease, transform .2s ease;
+}
+.step:hover { border-color: var(--panel-border-strong); transform: translateY(-2px); }
+.step .num {
+  font-family: "Fraunces", serif; font-style: italic; font-weight: 600;
+  color: var(--amber); font-size: 40px; line-height: 1; margin-bottom: 12px;
+}
+.step h3 {
+  font-family: "Fraunces", serif; font-weight: 600;
+  margin: 0 0 8px; font-size: 22px; color: var(--text);
+}
+.step p { margin: 0; color: var(--sage); font-size: 14.5px; }
+
+/* ---------- App ---------- */
+.app { padding: 20px 0 100px; }
+.app h2.section-title {
+  font-family: "Fraunces", serif; font-style: italic; font-weight: 600;
+  font-size: 36px; margin: 0 0 8px; letter-spacing: -0.01em;
+}
+.app p.section-sub { color: var(--sage); margin: 0 0 30px; }
+
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px; margin-bottom: 36px;
+}
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: inset 0 1px 0 rgba(245,182,66,0.05);
+}
+.stat .label {
+  color: var(--sage); font-size: 11.5px; text-transform: uppercase;
+  letter-spacing: 0.12em; font-weight: 500;
+}
+.stat .value {
+  font-family: "Fraunces", serif; font-weight: 600;
+  font-size: 26px; color: var(--text); margin-top: 6px;
+  letter-spacing: -0.01em;
+}
+.stat .value .unit { color: var(--amber); font-size: 15px; font-family: "Inter", sans-serif; margin-left: 4px; }
+
+/* Create form modal-style */
+.create-card {
+  background: var(--panel-2);
+  border: 1px solid var(--panel-border-strong);
+  border-radius: 22px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow:
+    inset 0 1px 0 rgba(245,182,66,0.10),
+    0 20px 60px rgba(0,0,0,0.35);
+  position: relative;
+  overflow: hidden;
+}
+.create-card::before {
+  content: ""; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+}
+.create-card h3 {
+  font-family: "Fraunces", serif; font-style: italic; font-weight: 600;
+  font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em;
+}
+.create-card .form-sub { color: var(--sage); margin: 0 0 24px; font-size: 14px; }
+
+.create-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+}
+.create-grid .full { grid-column: 1 / -1; }
+.field label {
+  display: block; color: var(--sage); font-size: 11.5px;
+  text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500;
+  margin-bottom: 6px;
+}
+.field label .req { color: var(--amber); margin-left: 3px; }
+.field input, .field textarea, .field select {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(148,168,158,0.16);
+  border-radius: 12px;
+  padding: 11px 14px;
+  color: var(--text);
+  font-family: "Inter", sans-serif; font-size: 14.5px;
+  transition: border-color .15s ease, background .15s ease;
+}
+.field input:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--amber);
+  background: rgba(245,182,66,0.05);
+}
+.field.required input, .field.required textarea {
+  border-color: rgba(245,182,66,0.28);
+}
+.slider-row {
+  display: flex; align-items: center; gap: 14px;
+}
+.slider-row input[type=range] { flex: 1; accent-color: var(--amber); }
+.slider-row .slider-val {
+  font-family: "Fraunces", serif; font-weight: 600;
+  color: var(--amber); min-width: 70px; text-align: right; font-size: 18px;
+}
+
+/* Live preview inside form */
+.live-preview {
+  margin-top: 20px; padding: 20px;
+  background: rgba(0,0,0,0.25);
+  border: 1px dashed rgba(245,182,66,0.20);
+  border-radius: 14px;
+}
+.live-preview .preview-tag {
+  color: var(--sage); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.14em; margin-bottom: 12px;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  border-bottom: 1px solid rgba(148,168,158,0.14);
+}
+.tab {
+  background: transparent; border: none;
+  padding: 12px 18px;
+  color: var(--sage); font-family: "Inter", sans-serif;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .15s ease, border-color .15s ease;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+/* ---------- Event cards ---------- */
+.events-grid {
+  display: grid; grid-template-columns: 1fr; gap: 20px;
+}
+@media (min-width: 900px) { .events-grid { grid-template-columns: 1fr 1fr; } }
+
+.event-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(245,182,66,0.08),
+    0 8px 30px rgba(0,0,0,0.20);
+  transition: border-color .2s ease, transform .2s ease;
+}
+.event-card::before {
+  content: ""; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber-glow), transparent);
+}
+.event-card:hover { border-color: var(--panel-border-strong); transform: translateY(-2px); }
+
+.event-head {
+  display: grid; grid-template-columns: 88px 1fr auto; gap: 20px; align-items: start;
+  margin-bottom: 16px;
+}
+.date-tile {
+  background: rgba(245,182,66,0.06);
+  border: 1px solid rgba(245,182,66,0.18);
+  border-radius: 14px;
+  padding: 10px 8px; text-align: center;
+  min-width: 88px;
+}
+.date-tile .month {
+  color: var(--amber); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+.date-tile .day {
+  font-family: "Fraunces", serif; font-weight: 600;
+  font-size: 40px; line-height: 1; color: var(--text);
+  margin: 4px 0 2px; letter-spacing: -0.02em;
+}
+.date-tile .time { color: var(--sage); font-size: 11px; letter-spacing: 0.06em; }
+
+.event-title-block h3 {
+  font-family: "Fraunces", serif; font-weight: 600;
+  font-size: 22px; margin: 0 0 6px; line-height: 1.2; letter-spacing: -0.01em;
+}
+.event-title-block .host {
+  color: var(--muted); font-size: 12.5px;
+}
+.event-title-block .host .you {
+  color: var(--amber); margin-left: 6px; font-weight: 600;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.status-pill.open { background: rgba(109,191,138,0.14); color: var(--success); border: 1px solid rgba(109,191,138,0.25); }
+.status-pill.locked { background: rgba(148,168,158,0.12); color: var(--sage); border: 1px solid rgba(148,168,158,0.22); }
+.status-pill.finalized { background: rgba(245,182,66,0.14); color: var(--amber); border: 1px solid rgba(245,182,66,0.28); }
+
+.event-desc {
+  color: var(--sage); font-size: 14.5px; margin: 6px 0 18px;
+}
+
+.event-meta {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 20px;
+  margin: 16px 0;
+  padding: 14px 16px;
+  background: rgba(0,0,0,0.20);
+  border-radius: 12px;
+}
+.meta-item .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+.meta-item .v {
+  color: var(--text); font-weight: 600; font-size: 14.5px; margin-top: 2px;
+}
+.meta-item .v.amber { color: var(--amber); font-family: "Fraunces", serif; font-size: 17px; }
+
+/* progress */
+.progress {
+  margin: 12px 0 16px;
+}
+.progress .bar-wrap {
+  height: 6px; background: rgba(255,255,255,0.05);
+  border-radius: 999px; overflow: hidden;
+}
+.progress .bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+  transition: width .3s ease;
+}
+.progress .p-labels {
+  display: flex; justify-content: space-between;
+  margin-top: 6px; font-size: 11.5px; color: var(--muted);
+}
+
+/* user status chips */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  background: rgba(255,255,255,0.03); color: var(--muted);
+  border: 1px solid rgba(148,168,158,0.15);
+}
+.chip.on { background: rgba(245,182,66,0.12); color: var(--amber); border-color: rgba(245,182,66,0.30); }
+.chip .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* Stamp for finalized */
+.stamp {
+  position: absolute; top: 22px; right: 22px;
+  font-family: "Fraunces", serif; font-style: italic; font-weight: 700;
+  color: var(--amber);
+  border: 2px solid var(--amber); border-radius: 6px;
+  padding: 3px 12px; font-size: 16px; letter-spacing: 0.14em;
+  transform: rotate(-8deg);
+  opacity: 0.85; pointer-events: none;
+  background: rgba(245,182,66,0.06);
+}
+.stamp.muted { color: var(--muted); border-color: rgba(148,168,158,0.4); background: rgba(148,168,158,0.06); }
+
+/* actions */
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+/* attendee list */
+.attendee-list {
+  margin-top: 14px;
+  max-height: 220px; overflow-y: auto;
+  border: 1px solid rgba(148,168,158,0.15);
+  border-radius: 12px;
+  padding: 8px;
+  background: rgba(0,0,0,0.22);
+}
+.attendee-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 8px;
+  font-size: 13px; color: var(--text);
+}
+.attendee-row:hover { background: rgba(245,182,66,0.04); }
+.attendee-row input { accent-color: var(--amber); }
+.attendee-row .addr { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12.5px; color: var(--sage); }
+.attendee-row .marked { color: var(--amber); font-size: 11px; margin-left: auto; }
+
+/* Empty state */
+.empty {
+  text-align: center; padding: 70px 20px;
+  color: var(--muted);
+  border: 1px dashed rgba(148,168,158,0.20);
+  border-radius: 18px;
+  background: rgba(0,0,0,0.15);
+}
+.empty .glyph {
+  font-family: "Fraunces", serif; font-style: italic;
+  color: var(--amber); font-size: 40px; margin-bottom: 10px; opacity: 0.7;
+}
+.empty p { margin: 4px 0; }
+.empty p.headline { font-family: "Fraunces", serif; font-style: italic; color: var(--text); font-size: 20px; }
+
+/* Toasts */
+.toast-wrap {
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  display: flex; flex-direction: column-reverse; gap: 10px;
+  max-width: 360px;
+}
+.toast {
+  background: rgba(15, 38, 32, 0.96);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--panel-border-strong);
+  border-left: 3px solid var(--amber);
+  border-radius: 999px 14px 14px 999px;
+  padding: 12px 20px 12px 16px;
+  color: var(--text);
+  font-size: 13.5px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  animation: slidein .28s ease;
+  display: flex; align-items: center; gap: 10px;
+}
+.toast.ok { border-left-color: var(--success); }
+.toast.err { border-left-color: var(--rose); background: rgba(60, 25, 25, 0.9); }
+.toast .t-title { font-family: "Fraunces", serif; font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.1em; margin-right: 4px; color: var(--amber); }
+.toast.ok .t-title { color: var(--success); }
+.toast.err .t-title { color: var(--rose); }
+@keyframes slidein {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Footer */
+footer {
+  text-align: center; padding: 40px 0 30px;
+  color: var(--muted); font-size: 12.5px;
+  border-top: 1px solid rgba(245,182,66,0.08);
+  margin-top: 40px;
+}
+footer .foot-mark { color: var(--amber); font-family: "Fraunces", serif; font-style: italic; }
+
+/* Responsive */
+@media (max-width: 720px) {
+  .create-grid { grid-template-columns: 1fr; }
+  .event-head { grid-template-columns: 76px 1fr; }
+  .status-pill { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+  .stamp { top: 14px; right: 14px; font-size: 13px; padding: 2px 9px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<!-- CONTRACT CONFIG                                                   -->
+<!-- Default: BOT Chain TESTNET (chainId 968 / 0x3C8)                  -->
+<!-- To switch to MAINNET (chainId 677 / 0x2A5):                       -->
+<!--   NETWORK.chainId = "0x2A5";                                      -->
+<!--   NETWORK.chainName = "BOT Chain";                                -->
+<!--   NETWORK.rpcUrls = ["https://rpc.botchain.ai"];                  -->
+<!--   NETWORK.blockExplorerUrls = ["https://scan.botchain.ai"];       -->
+<!--   Update netLabel in the footer to "MAINNET"                      -->
+<!-- ================================================================ -->
+
+<div class="topbar">
+  <div class="container topbar-inner">
+    <div class="wordmark">RSVP<span class="amp">·</span>ledge</div>
+    <button id="connectBtn" class="btn btn-primary">Connect Wallet</button>
+  </div>
+</div>
+
+<section class="hero container">
+  <h1>Say you'll come.<br><span class="accent italic">Mean it.</span></h1>
+  <p class="sub">Free RSVPs are worthless. RSVPledge asks every guest to post a refundable deposit — you get it back when you show up, and a slice of what the flakes forfeit as a bonus for being there.</p>
+  <div class="cta-row">
+    <a href="#appSection" class="btn btn-primary">Browse events</a>
+    <a href="#howSection" class="btn btn-ghost">How the pledge works</a>
+  </div>
+
+  <div class="hero-preview">
+    <div class="event-card">
+      <div class="stamp">SAMPLE</div>
+      <div class="event-head">
+        <div class="date-tile">
+          <div class="month">Sep</div>
+          <div class="day">27</div>
+          <div class="time">7:30 PM</div>
+        </div>
+        <div class="event-title-block">
+          <h3>Rooftop Dinner &amp; Slow Records</h3>
+          <div class="host">Hosted by 0x3f2a…9b0e</div>
+        </div>
+        <div><span class="status-pill open">Open</span></div>
+      </div>
+      <div class="event-desc">Twelve seats, one long table, a Rega turntable, and a menu that changes with what came in that morning.</div>
+      <div class="progress">
+        <div class="bar-wrap"><div class="bar-fill" style="width:66%"></div></div>
+        <div class="p-labels"><span>8 / 12 RSVPd</span><span>Cutoff Sep 25</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<section id="howSection" class="how container">
+  <h2>How the pledge works</h2>
+  <p class="lede">Three moves. On-chain. No middleman holds the money — the contract does.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="num">01</div>
+      <h3>Host sets the deposit</h3>
+      <p>Pick a cap, a cutoff, an event date, and how the forfeited pool splits between you and the guests who showed.</p>
+    </div>
+    <div class="step">
+      <div class="num">02</div>
+      <h3>Guests pledge in</h3>
+      <p>RSVP by posting the deposit. Cancel before cutoff for a full refund. After cutoff, the guest list is locked.</p>
+    </div>
+    <div class="step">
+      <div class="num">03</div>
+      <h3>Show up, get more back</h3>
+      <p>Host marks attendance. Attendees claim their deposit and split the flakes' forfeits as a show-up bonus.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<section id="appSection" class="app container">
+  <h2 class="section-title">Your table</h2>
+  <p class="section-sub">Create an event, browse who's hosting, or check the pledges you've made.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Upcoming events</div><div class="value" id="statUpcoming">—</div></div>
+    <div class="stat"><div class="label">RSVPs held</div><div class="value" id="statHeld">— <span class="unit">BOT</span></div></div>
+    <div class="stat"><div class="label">My reservations</div><div class="value" id="statMine">—</div></div>
+    <div class="stat"><div class="label">Hosting</div><div class="value" id="statHosting">—</div></div>
+  </div>
+
+  <div class="create-card">
+    <h3>Host an event</h3>
+    <p class="form-sub">Tickets appear as soon as the transaction confirms.</p>
+    <div class="create-grid">
+      <div class="field full required">
+        <label>Event title<span class="req">*</span></label>
+        <input id="fTitle" placeholder="Rooftop Dinner & Slow Records" maxlength="120">
+      </div>
+      <div class="field full">
+        <label>Description</label>
+        <textarea id="fDesc" rows="2" placeholder="Tell guests what to expect."></textarea>
+      </div>
+      <div class="field required">
+        <label>Deposit (BOT)<span class="req">*</span></label>
+        <input id="fDeposit" type="number" min="0" step="0.001" value="0.1">
+      </div>
+      <div class="field required">
+        <label>Guest cap<span class="req">*</span></label>
+        <input id="fCap" type="number" min="1" max="1000" value="12">
+      </div>
+      <div class="field required">
+        <label>RSVP cutoff<span class="req">*</span></label>
+        <input id="fCutoff" type="datetime-local">
+      </div>
+      <div class="field required">
+        <label>Event date &amp; time<span class="req">*</span></label>
+        <input id="fDate" type="datetime-local">
+      </div>
+      <div class="field full">
+        <label>Host share of forfeited pool — <span id="splitLbl" style="color:var(--amber);font-weight:600">50%</span> to host, rest split among attendees</label>
+        <div class="slider-row">
+          <span style="color:var(--muted);font-size:12px">0%</span>
+          <input id="fSplit" type="range" min="0" max="10000" step="100" value="5000">
+          <span style="color:var(--muted);font-size:12px">100%</span>
+          <span class="slider-val" id="splitLblBig">50%</span>
+        </div>
+      </div>
+
+      <div class="live-preview full" id="livePreview">
+        <div class="preview-tag">Live preview</div>
+        <div id="livePreviewCard"></div>
+      </div>
+
+      <div class="full"><button id="createBtn" class="btn btn-primary btn-block">Publish event</button></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="discover">Discover</button>
+    <button class="tab" data-tab="rsvps">My RSVPs</button>
+    <button class="tab" data-tab="mine">Hosting</button>
+  </div>
+
+  <div id="eventsPane"></div>
+</section>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<footer>
+  RSVPledge · running on <span class="foot-mark">BOT Chain</span> · <span id="netLabel">TESTNET</span>
+</footer>
+
+<script>
+/* ==========================================================
+   MAINNET SWAP VALUES (see comment block above <body>):
+     1) NETWORK.chainId          → "0x2A5"
+     2) NETWORK.chainName        → "BOT Chain"
+     3) NETWORK.rpcUrls          → ["https://rpc.botchain.ai"]
+     4) NETWORK.blockExplorerUrls→ ["https://scan.botchain.ai"]
+     5) #netLabel text           → "MAINNET"
+   ========================================================== */
+
+const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+// Default: TESTNET.
+const NETWORK = {
+  chainId: "0x3C8", // 968
+  chainName: "BOT Chain Testnet",
+  nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 },
+  rpcUrls: ["https://rpc.bohr.life"],
+  blockExplorerUrls: ["https://scan.bohr.life"],
+};
+
+const ABI = [
+  "function createEvent(string title, string description, uint16 cap, uint256 depositAmount, uint256 rsvpCutoff, uint256 eventDate, uint16 noShowSplitBps) external returns (uint256)",
+  "function rsvp(uint256 eventId) external payable",
+  "function cancelRsvp(uint256 eventId) external",
+  "function markAttended(uint256 eventId, address[] addresses) external",
+  "function finalizeEvent(uint256 eventId) external",
+  "function claimRefund(uint256 eventId) external",
+  "function claimShowUpBonus(uint256 eventId) external",
+  "function getEvent(uint256 eventId) view returns (address host, string title, string description, uint16 cap, uint256 depositAmount, uint256 rsvpCutoff, uint256 eventDate, uint16 noShowSplitBps, uint16 rsvpCount, uint16 attendedCount, uint8 status)",
+  "function getAttendees(uint256 eventId) view returns (address[])",
+  "function getAttendeeStatus(uint256 eventId, address a) view returns (bool rsvpd, bool attended, bool refundClaimed, bool bonusClaimed)",
+  "function getEventsByHost(address a) view returns (uint256[])",
+  "function getEventsByAttendee(address a) view returns (uint256[])",
+  "function eventCount() view returns (uint256)",
+  "function finalizeGrace() view returns (uint256)",
+  "event EventCreated(uint256 indexed eventId, address indexed host, string title, uint256 depositAmount, uint256 eventDate)"
+];
+
+/* ---------- State ---------- */
+let provider, signer, userAddr, contract, readContract;
+let activeTab = "discover";
+let cachedEvents = [];
+let finalizeGraceSecs = 7 * 86400;
+
+/* ---------- Helpers ---------- */
+const $ = (s) => document.querySelector(s);
+const short = (a) => a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
+const fmtBot = (wei) => Number(ethers.formatEther(wei)).toLocaleString(undefined, { maximumFractionDigits: 4 });
+const nowSec = () => Math.floor(Date.now() / 1000);
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function dateBits(sec) {
+  const d = new Date(Number(sec) * 1000);
+  return {
+    month: MONTHS[d.getMonth()],
+    day: d.getDate(),
+    time: d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+    full: d.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }),
+  };
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
+
+function toast(title, msg, kind = "") {
+  const el = document.createElement("div");
+  el.className = "toast " + kind;
+  el.innerHTML = `<span class="t-title">${escapeHtml(title)}</span><span>${escapeHtml(msg || "")}</span>`;
+  $("#toastWrap").appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateY(6px)"; }, 5000);
+  setTimeout(() => el.remove(), 5500);
+}
+
+/* ---------- Wallet ---------- */
+async function connect() {
+  if (!window.ethereum) { toast("No wallet", "Install MetaMask to continue.", "err"); return; }
+  try {
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    await ensureNetwork();
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    userAddr = await signer.getAddress();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+    readContract = contract;
+    $("#connectBtn").textContent = short(userAddr);
+    $("#connectBtn").classList.remove("btn-primary");
+    $("#connectBtn").classList.add("btn-ghost");
+    window.ethereum.on("accountsChanged", () => location.reload());
+    window.ethereum.on("chainChanged", () => location.reload());
+    await refreshAll();
+    toast("Connected", short(userAddr), "ok");
+  } catch (e) {
+    toast("Connect failed", e.message || String(e), "err");
+  }
+}
+
+async function ensureNetwork() {
+  try {
+    await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: NETWORK.chainId }] });
+  } catch (e) {
+    if (e.code === 4902) {
+      await window.ethereum.request({ method: "wallet_addEthereumChain", params: [NETWORK] });
+    } else { throw e; }
+  }
+}
+
+/* ---------- Data ---------- */
+async function loadAllEvents() {
+  if (!readContract) return [];
+  const count = Number(await readContract.eventCount());
+  const list = [];
+  for (let i = 0; i < count; i++) {
+    const e = await readContract.getEvent(i);
+    list.push({
+      id: i,
+      host: e.host,
+      title: e.title,
+      description: e.description,
+      cap: Number(e.cap),
+      depositAmount: e.depositAmount,
+      rsvpCutoff: Number(e.rsvpCutoff),
+      eventDate: Number(e.eventDate),
+      noShowSplitBps: Number(e.noShowSplitBps),
+      rsvpCount: Number(e.rsvpCount),
+      attendedCount: Number(e.attendedCount),
+      status: Number(e.status),
+    });
+  }
+  cachedEvents = list;
+  return list;
+}
+
+async function refreshAll() {
+  try { finalizeGraceSecs = Number(await readContract.finalizeGrace()); } catch (_) {}
+  await loadAllEvents();
+  refreshStats();
+  await renderTab();
+}
+
+function refreshStats() {
+  const upcoming = cachedEvents.filter(e => e.eventDate > nowSec() && e.status !== 2).length;
+  let held = 0n;
+  for (const e of cachedEvents) {
+    if (e.status !== 2) held += BigInt(e.rsvpCount) * e.depositAmount;
+  }
+  $("#statUpcoming").textContent = upcoming;
+  $("#statHeld").innerHTML = fmtBot(held) + ' <span class="unit">BOT</span>';
+  if (userAddr) {
+    const mine = cachedEvents.filter(e => e.host.toLowerCase() === userAddr.toLowerCase()).length;
+    $("#statHosting").textContent = mine;
+    // My reservations counted async in renderTab? Approximate here by not touching if unknown
+    // We'll compute by scanning
+    (async () => {
+      let count = 0;
+      for (const e of cachedEvents) {
+        try {
+          const s = await readContract.getAttendeeStatus(e.id, userAddr);
+          if (s.rsvpd) count++;
+        } catch (_) {}
+      }
+      $("#statMine").textContent = count;
+    })();
+  } else {
+    $("#statMine").textContent = "—";
+    $("#statHosting").textContent = "—";
+  }
+}
+
+/* ---------- Rendering ---------- */
+function statusInfo(e) {
+  if (e.status === 2) return { key: "finalized", label: "Finalized" };
+  if (e.status === 1 || nowSec() >= e.rsvpCutoff) return { key: "locked", label: "Locked" };
+  return { key: "open", label: "Open" };
+}
+
+async function renderTab() {
+  const pane = $("#eventsPane");
+  if (!readContract) {
+    pane.innerHTML = emptyState("Connect your wallet", "to see and pledge to events on BOT Chain.");
+    return;
+  }
+  let list = [...cachedEvents];
+  if (activeTab === "discover") {
+    list = list.filter(e => e.status === 0 && e.eventDate > nowSec());
+  } else if (activeTab === "rsvps") {
+    if (!userAddr) list = [];
+    else {
+      const rsvpd = [];
+      for (const e of list) {
+        const s = await readContract.getAttendeeStatus(e.id, userAddr);
+        if (s.rsvpd || s.attended || s.refundClaimed || s.bonusClaimed) rsvpd.push(e);
+      }
+      list = rsvpd;
+    }
+  } else if (activeTab === "mine") {
+    list = list.filter(e => userAddr && e.host.toLowerCase() === userAddr.toLowerCase());
+  }
+
+  if (list.length === 0) {
+    const [h, s] = ({
+      discover: ["No open events yet", "Be the first — host one above."],
+      rsvps:    ["No pledges yet", "Find an event in Discover and put some skin in."],
+      mine:     ["You haven't hosted anything", "Publish an event to see it here."],
+    }[activeTab]);
+    pane.innerHTML = emptyState(h, s);
+    return;
+  }
+  pane.innerHTML = `<div class="events-grid" id="eg"></div>`;
+  const grid = $("#eg");
+  for (const e of list) grid.appendChild(await renderEventCard(e));
+}
+
+function emptyState(headline, sub) {
+  return `<div class="empty">
+    <div class="glyph">✦</div>
+    <p class="headline">${escapeHtml(headline)}</p>
+    <p>${escapeHtml(sub)}</p>
+  </div>`;
+}
+
+async function renderEventCard(e) {
+  const wrap = document.createElement("div");
+  wrap.className = "event-card";
+  const info = statusInfo(e);
+  const past = nowSec() > e.eventDate;
+  const graceOver = nowSec() > e.eventDate + finalizeGraceSecs;
+  const isHost = userAddr && e.host.toLowerCase() === userAddr.toLowerCase();
+
+  let userStatus = { rsvpd: false, attended: false, refundClaimed: false, bonusClaimed: false };
+  if (userAddr) {
+    try {
+      const s = await readContract.getAttendeeStatus(e.id, userAddr);
+      userStatus = { rsvpd: s.rsvpd, attended: s.attended, refundClaimed: s.refundClaimed, bonusClaimed: s.bonusClaimed };
+    } catch (_) {}
+  }
+
+  let stampHtml = "";
+  if (e.status === 2) stampHtml = `<div class="stamp">Finalized</div>`;
+  else if (info.key === "locked") stampHtml = `<div class="stamp muted">Locked</div>`;
+  else if (userStatus.rsvpd) stampHtml = `<div class="stamp">Pledged</div>`;
+
+  const d = dateBits(e.eventDate);
+  const cd = dateBits(e.rsvpCutoff);
+  const pct = e.cap > 0 ? Math.min(100, Math.round((e.rsvpCount / e.cap) * 100)) : 0;
+
+  const chips = `
+    <div class="chips">
+      <span class="chip ${userStatus.rsvpd ? "on" : ""}"><span class="dot"></span>RSVPd</span>
+      <span class="chip ${userStatus.attended ? "on" : ""}"><span class="dot"></span>Attended</span>
+      <span class="chip ${userStatus.refundClaimed ? "on" : ""}"><span class="dot"></span>Refunded</span>
+      <span class="chip ${userStatus.bonusClaimed ? "on" : ""}"><span class="dot"></span>Bonus</span>
+    </div>`;
+
+  const actions = [];
+  if (!isHost && e.status === 0 && nowSec() < e.rsvpCutoff && !userStatus.rsvpd && e.rsvpCount < e.cap) {
+    actions.push(`<button class="btn btn-primary btn-sm" data-act="rsvp" data-id="${e.id}">RSVP · Deposit ${fmtBot(e.depositAmount)} BOT</button>`);
+  }
+  if (userStatus.rsvpd && e.status === 0 && nowSec() < e.rsvpCutoff) {
+    actions.push(`<button class="btn btn-ghost btn-sm" data-act="cancel" data-id="${e.id}">Cancel & refund</button>`);
+  }
+  if (e.status === 2 && userStatus.attended && !userStatus.refundClaimed) {
+    actions.push(`<button class="btn btn-primary btn-sm" data-act="refund" data-id="${e.id}">Claim refund</button>`);
+  }
+  if (e.status === 2 && userStatus.attended && !userStatus.bonusClaimed) {
+    actions.push(`<button class="btn btn-ghost btn-sm" data-act="bonus" data-id="${e.id}">Claim show-up bonus</button>`);
+  }
+  if (graceOver && e.status !== 2) {
+    actions.push(`<button class="btn btn-ghost btn-sm" data-act="finalize" data-id="${e.id}">Finalize event</button>`);
+  }
+
+  const hostControls = (isHost && past && e.status !== 2) ? `
+    <div class="attendee-list" id="alist-${e.id}"><div style="padding:10px;color:var(--muted);font-size:13px">Loading attendees…</div></div>
+    <div class="actions"><button class="btn btn-primary btn-sm" data-act="mark" data-id="${e.id}">Mark checked as attended</button></div>
+  ` : "";
+
+  wrap.innerHTML = `
+    ${stampHtml}
+    <div class="event-head">
+      <div class="date-tile">
+        <div class="month">${d.month}</div>
+        <div class="day">${d.day}</div>
+        <div class="time">${d.time}</div>
+      </div>
+      <div class="event-title-block">
+        <h3>${escapeHtml(e.title)}</h3>
+        <div class="host">Hosted by ${short(e.host)}${isHost ? '<span class="you">· you</span>' : ""}</div>
+      </div>
+      <div><span class="status-pill ${info.key}">${info.label}</span></div>
+    </div>
+    ${e.description ? `<div class="event-desc">${escapeHtml(e.description)}</div>` : ""}
+    ${chips}
+    <div class="progress">
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="p-labels"><span>${e.rsvpCount} / ${e.cap} RSVPd${e.attendedCount ? " · " + e.attendedCount + " attended" : ""}</span><span>RSVP by ${cd.full}</span></div>
+    </div>
+    <div class="event-meta">
+      <div class="meta-item"><div class="k">Deposit</div><div class="v amber">${fmtBot(e.depositAmount)} BOT</div></div>
+      <div class="meta-item"><div class="k">Host share</div><div class="v">${(e.noShowSplitBps/100).toFixed(1)}%</div></div>
+      <div class="meta-item"><div class="k">Event ID</div><div class="v">#${String(e.id).padStart(4,"0")}</div></div>
+      <div class="meta-item"><div class="k">Event date</div><div class="v">${d.full}</div></div>
+    </div>
+    <div class="actions">${actions.join("")}</div>
+    ${hostControls}
+  `;
+
+  wrap.querySelectorAll("button[data-act]").forEach(b =>
+    b.addEventListener("click", () => handleAction(b.dataset.act, Number(b.dataset.id), wrap))
+  );
+  if (isHost && past && e.status !== 2) loadAttendeeChecklist(e.id);
+  return wrap;
+}
+
+async function loadAttendeeChecklist(id) {
+  const box = document.getElementById("alist-" + id);
+  if (!box) return;
+  try {
+    const addrs = await readContract.getAttendees(id);
+    if (addrs.length === 0) { box.innerHTML = `<div style="padding:10px;color:var(--muted);font-size:13px">No one RSVPd.</div>`; return; }
+    const rows = [];
+    for (const a of addrs) {
+      const s = await readContract.getAttendeeStatus(id, a);
+      rows.push(`<label class="attendee-row">
+        <input type="checkbox" data-addr="${a}" ${s.attended ? "checked disabled" : ""}>
+        <span class="addr">${short(a)}</span>
+        ${s.attended ? '<span class="marked">✓ marked</span>' : ""}
+      </label>`);
+    }
+    box.innerHTML = rows.join("");
+  } catch (e) {
+    box.innerHTML = `<div style="padding:10px;color:var(--rose);font-size:13px">Couldn't load attendees.</div>`;
+  }
+}
+
+/* ---------- Live preview ---------- */
+function renderLivePreview() {
+  const title = $("#fTitle").value.trim() || "Your event title";
+  const desc = $("#fDesc").value.trim();
+  const dep = parseFloat($("#fDeposit").value || "0") || 0;
+  const cap = parseInt($("#fCap").value || "0", 10) || 0;
+  const date = $("#fDate").value;
+  const bps = parseInt($("#fSplit").value || "5000", 10);
+  const d = date ? dateBits(new Date(date).getTime()/1000) : { month: "—", day: "—", time: "—", full: "—" };
+  $("#livePreviewCard").innerHTML = `
+    <div class="event-card" style="margin:0;">
+      <div class="event-head">
+        <div class="date-tile">
+          <div class="month">${d.month}</div>
+          <div class="day">${d.day}</div>
+          <div class="time">${d.time}</div>
+        </div>
+        <div class="event-title-block">
+          <h3>${escapeHtml(title)}</h3>
+          <div class="host">Hosted by ${short(userAddr) || "you"}<span class="you">· preview</span></div>
+        </div>
+        <div><span class="status-pill open">Open</span></div>
+      </div>
+      ${desc ? `<div class="event-desc">${escapeHtml(desc)}</div>` : ""}
+      <div class="event-meta">
+        <div class="meta-item"><div class="k">Deposit</div><div class="v amber">${dep.toFixed(3)} BOT</div></div>
+        <div class="meta-item"><div class="k">Host share</div><div class="v">${(bps/100).toFixed(1)}%</div></div>
+        <div class="meta-item"><div class="k">Cap</div><div class="v">${cap}</div></div>
+        <div class="meta-item"><div class="k">Event date</div><div class="v">${d.full}</div></div>
+      </div>
+    </div>`;
+}
+
+/* ---------- Actions ---------- */
+async function handleAction(act, id, wrap) {
+  if (!signer) { toast("Not connected", "Connect your wallet first.", "err"); return; }
+  try {
+    let tx;
+    const e = cachedEvents.find(x => x.id === id);
+    if (act === "rsvp") tx = await contract.rsvp(id, { value: e.depositAmount });
+    else if (act === "cancel") tx = await contract.cancelRsvp(id);
+    else if (act === "refund") tx = await contract.claimRefund(id);
+    else if (act === "bonus") tx = await contract.claimShowUpBonus(id);
+    else if (act === "finalize") tx = await contract.finalizeEvent(id);
+    else if (act === "mark") {
+      const boxes = wrap.querySelectorAll(`#alist-${id} input[type=checkbox]:checked:not(:disabled)`);
+      const addrs = Array.from(boxes).map(b => b.dataset.addr);
+      if (addrs.length === 0) { toast("Nothing selected", "Tick the boxes for guests who showed.", "err"); return; }
+      tx = await contract.markAttended(id, addrs);
+    }
+    toast("Submitted", "Tx " + tx.hash.slice(0, 10) + "…");
+    await tx.wait();
+    toast("Confirmed", act.toUpperCase() + " succeeded.", "ok");
+    await refreshAll();
+  } catch (err) {
+    toast("Failed", (err.reason || err.shortMessage || err.message || "").slice(0, 200), "err");
+  }
+}
+
+async function createEvent() {
+  if (!signer) { toast("Not connected", "Connect your wallet first.", "err"); return; }
+  const title = $("#fTitle").value.trim();
+  const desc = $("#fDesc").value.trim();
+  const cap = parseInt($("#fCap").value, 10);
+  const dep = $("#fDeposit").value;
+  const cutoff = $("#fCutoff").value;
+  const date = $("#fDate").value;
+  const bps = parseInt($("#fSplit").value, 10);
+  if (!title || !cutoff || !date) { toast("Missing", "Fill title, cutoff and event date.", "err"); return; }
+  const cutSec = Math.floor(new Date(cutoff).getTime() / 1000);
+  const dateSec = Math.floor(new Date(date).getTime() / 1000);
+  if (cutSec <= nowSec()) { toast("Cutoff", "RSVP cutoff must be in the future.", "err"); return; }
+  if (dateSec <= cutSec) { toast("Order", "Event date must be after cutoff.", "err"); return; }
+  try {
+    const tx = await contract.createEvent(title, desc, cap, ethers.parseEther(dep), cutSec, dateSec, bps);
+    toast("Publishing", "Tx " + tx.hash.slice(0, 10) + "…");
+    await tx.wait();
+    toast("Published", "Your event is live.", "ok");
+    $("#fTitle").value = ""; $("#fDesc").value = "";
+    renderLivePreview();
+    await refreshAll();
+  } catch (err) {
+    toast("Create failed", (err.reason || err.shortMessage || err.message || "").slice(0, 200), "err");
+  }
+}
+
+/* ---------- Wiring ---------- */
+$("#connectBtn").addEventListener("click", connect);
+$("#createBtn").addEventListener("click", createEvent);
+$("#fSplit").addEventListener("input", (e) => {
+  const pct = (e.target.value / 100).toFixed(0);
+  $("#splitLbl").textContent = pct + "%";
+  $("#splitLblBig").textContent = pct + "%";
+  renderLivePreview();
+});
+["fTitle","fDesc","fDeposit","fCap","fDate","fCutoff"].forEach(id => {
+  document.getElementById(id).addEventListener("input", renderLivePreview);
+});
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+  t.classList.add("active");
+  activeTab = t.dataset.tab;
+  renderTab();
+}));
+
+/* Prefill datetime fields */
+(function prefill() {
+  const pad = (n) => String(n).padStart(2, "0");
+  const fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const t = new Date(Date.now() + 86400000);
+  const t2 = new Date(Date.now() + 2 * 86400000);
+  $("#fCutoff").value = fmt(t);
+  $("#fDate").value = fmt(t2);
+  renderLivePreview();
+})();
+
+/* Read-only fallback so the page can show events pre-connect */
+(async function readonly() {
+  try {
+    const rp = new ethers.JsonRpcProvider(NETWORK.rpcUrls[0]);
+    readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, rp);
+    if (CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000") {
+      await refreshAll();
+    }
+  } catch (_) {}
+})();
+</script>
+</body>
+</html>
