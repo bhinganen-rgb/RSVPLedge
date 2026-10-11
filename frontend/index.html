@@ -482,19 +482,30 @@ footer .foot-mark { color: var(--amber); font-family: "Fraunces", serif; font-st
   .status-pill { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
   .stamp { top: 14px; right: 14px; font-size: 13px; padding: 2px 9px; }
 }
+
+/* ===== BOT Chain footer (BD criteria 5) — editorial colophon ===== */
+.bc-wrap{padding:0 20px 52px;text-align:center}
+.bc-rule{width:52px;height:1px;background:var(--amber);opacity:.55;margin:0 auto 22px}
+.bc-say{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+  font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:20px;color:var(--text);
+  text-decoration:none}
+.bc-say .bc-logo{height:28px;width:auto;display:block}
+.bc-say b{font-weight:600;font-style:normal;font-family:'Inter',system-ui,sans-serif;
+  font-size:18px;letter-spacing:-.01em;color:var(--text)}
+.bc-note{margin-top:12px;font-family:'Inter',system-ui,sans-serif;font-size:10px;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.bc-note a{color:var(--amber);text-decoration:none}
+.bc-note a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
 
 <!-- ================================================================ -->
 <!-- CONTRACT CONFIG                                                   -->
-<!-- Default: BOT Chain TESTNET (chainId 968 / 0x3C8)                  -->
-<!-- To switch to MAINNET (chainId 677 / 0x2A5):                       -->
-<!--   NETWORK.chainId = "0x2A5";                                      -->
-<!--   NETWORK.chainName = "BOT Chain";                                -->
-<!--   NETWORK.rpcUrls = ["https://rpc.botchain.ai"];                  -->
-<!--   NETWORK.blockExplorerUrls = ["https://scan.botchain.ai"];       -->
-<!--   Update netLabel in the footer to "MAINNET"                      -->
+<!-- LIVE: BOT Chain MAINNET (chainId 677 / 0x2A5)                    -->
+<!-- rpc https://rpc.botchain.ai  |  explorer https://scan.botchain.ai -->
+<!-- Testnet, if ever needed: 0x3C8 / 968 / BOT Chain Testnet          -->
+<!--   rpc https://rpc.bohr.life  |  explorer https://scan.bohr.life   -->
 <!-- ================================================================ -->
 
 <div class="topbar">
@@ -632,7 +643,7 @@ footer .foot-mark { color: var(--amber); font-family: "Fraunces", serif; font-st
 <div class="toast-wrap" id="toastWrap"></div>
 
 <footer>
-  RSVPledge · running on <span class="foot-mark">BOT Chain</span> · <span id="netLabel">TESTNET</span>
+  RSVPledge · running on <span class="foot-mark">BOT Chain</span> · <span id="netLabel">MAINNET</span>
 </footer>
 
 <script>
@@ -642,18 +653,18 @@ footer .foot-mark { color: var(--amber); font-family: "Fraunces", serif; font-st
      2) NETWORK.chainName        → "BOT Chain"
      3) NETWORK.rpcUrls          → ["https://rpc.botchain.ai"]
      4) NETWORK.blockExplorerUrls→ ["https://scan.botchain.ai"]
-     5) #netLabel text           → "MAINNET"
+     5) #netLabel text           → "MAINNET"  [done]
    ========================================================== */
 
-const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000";
+const CONTRACT_ADDRESS = "0x702a60d43d4A11A46e08419Cb372C630f061c1Ab";
 
-// Default: TESTNET.
+// Live: MAINNET.
 const NETWORK = {
-  chainId: "0x3C8", // 968
-  chainName: "BOT Chain Testnet",
+  chainId: "0x2A5", // 677
+  chainName: "BOT Chain",
   nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 },
-  rpcUrls: ["https://rpc.bohr.life"],
-  blockExplorerUrls: ["https://scan.bohr.life"],
+  rpcUrls: ["https://rpc.botchain.ai"],
+  blockExplorerUrls: ["https://scan.botchain.ai"],
 };
 
 const ABI = [
@@ -1093,5 +1104,14 @@ document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () =>
   } catch (_) {}
 })();
 </script>
+
+<div class="bc-wrap">
+  <div class="bc-rule"></div>
+  <a class="bc-say" href="https://botchain.ai" target="_blank" rel="noopener">
+    Built on <img class="bc-logo" src="data:image/png;base64,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" alt="BOT Chain"> <b>BOT Chain</b>
+  </a>
+  <div class="bc-note">Mainnet 677 &nbsp;&middot;&nbsp; <a href="https://scan.botchain.ai" target="_blank" rel="noopener">scan.botchain.ai</a></div>
+</div>
+
 </body>
 </html>
